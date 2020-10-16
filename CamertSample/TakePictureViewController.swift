@@ -216,10 +216,9 @@ class TakePictureViewController: UIViewController {
             defer {self.captureSession.commitConfiguration()}
 
             
-            //self.captureSession.beginConfiguration()
             self.captureSession.removeInput(currentCameraInput)
             self.captureSession.addInput(newVideoInput)
-            //self.captureSession.commitConfiguration()
+        
             
             self.camTorchOn = false
         }

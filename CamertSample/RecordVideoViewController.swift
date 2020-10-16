@@ -9,22 +9,6 @@ import UIKit
 import AVFoundation
 
 
-extension UIButton {
-
-       func changeImageAnimated(image: UIImage?) {
-        guard let imageView = self.imageView, let currentImage = imageView.image, let newImage = image else {
-               return
-           }
-           let crossFade: CABasicAnimation = CABasicAnimation(keyPath: "contents")
-           crossFade.duration = 0.3
-            crossFade.fromValue = currentImage.cgImage
-            crossFade.toValue = newImage.cgImage
-            crossFade.isRemovedOnCompletion = false
-            crossFade.fillMode = CAMediaTimingFillMode.forwards
-            imageView.layer.add(crossFade, forKey: "animateContents")
-       }
-   }
-
 class RecordVideoViewController: UIViewController {
     
     var captureSession = AVCaptureSession()
@@ -166,16 +150,13 @@ class RecordVideoViewController: UIViewController {
     
     @objc func recordAction(){
         if movieOutput.isRecording {
+            
             movieOutput.stopRecording()
-            //self.recordButton.setImage(UIImage(named: "record_btn_on"), for: .normal)
-            
-            self.recordButton.changeImageAnimated(image: UIImage(named: "record_btn_on"))
-            
+            self.recordButton.setImage(UIImage(named: "record_btn_on"), for: .normal)
+    
         } else {
             
-            self.recordButton.changeImageAnimated(image: UIImage(named: "record_btn_off"))
-            
-            //self.recordButton.setImage(UIImage(named: "record_btn_off"), for: .normal)
+            self.recordButton.setImage(UIImage(named: "record_btn_off"), for: .normal)
             let paths = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)
             let fileUrl = paths[0].appendingPathComponent("tmp_output.mov")
             try? FileManager.default.removeItem(at: fileUrl)
@@ -199,9 +180,21 @@ class RecordVideoViewController: UIViewController {
     @objc func switchCameraAction(){
         
         DispatchQueue.global().async {
-            guard let currentCameraInput: AVCaptureInput = self.captureSession.inputs.first else {
+            
+            
+            var currentCameraInput: AVCaptureInput?
+            for input in self.captureSession.inputs{
+                if let devInput = input as? AVCaptureDeviceInput,
+                   devInput.device.deviceType != .builtInMicrophone {
+                    currentCameraInput = input
+                    break
+                }
+            }
+            
+            guard currentCameraInput != nil else{
                 return
             }
+         
 
             var newCamera: AVCaptureDevice! = nil
             if let input = currentCameraInput as? AVCaptureDeviceInput {
@@ -220,13 +213,12 @@ class RecordVideoViewController: UIViewController {
                 return
             }
 
-            
             self.captureSession.beginConfiguration()
-            self.captureSession.removeInput(currentCameraInput)
-            self.captureSession.addInput(newVideoInput)
-            self.captureSession.commitConfiguration()
+            defer {self.captureSession.commitConfiguration()}
             
-  
+            self.captureSession.removeInput(currentCameraInput!)
+            self.captureSession.addInput(newVideoInput)
+            
         }
     
     }
