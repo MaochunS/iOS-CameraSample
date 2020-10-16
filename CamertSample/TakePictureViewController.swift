@@ -188,7 +188,9 @@ class TakePictureViewController: UIViewController {
     
     @objc func switchCameraAction(){
         
-        DispatchQueue.global().async {
+        UIView.transition(with: self.view, duration: 0.8, options: .transitionFlipFromLeft, animations: nil)
+        
+        DispatchQueue.global().async { [self] in
             guard let currentCameraInput: AVCaptureInput = self.captureSession.inputs.first else {
                 return
             }
@@ -209,12 +211,15 @@ class TakePictureViewController: UIViewController {
                 print("create new camera input failed! \(err.localizedDescription)")
                 return
             }
-
             
             self.captureSession.beginConfiguration()
+            defer {self.captureSession.commitConfiguration()}
+
+            
+            //self.captureSession.beginConfiguration()
             self.captureSession.removeInput(currentCameraInput)
             self.captureSession.addInput(newVideoInput)
-            self.captureSession.commitConfiguration()
+            //self.captureSession.commitConfiguration()
             
             self.camTorchOn = false
         }

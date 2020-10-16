@@ -8,6 +8,23 @@
 import UIKit
 import AVFoundation
 
+
+extension UIButton {
+
+       func changeImageAnimated(image: UIImage?) {
+        guard let imageView = self.imageView, let currentImage = imageView.image, let newImage = image else {
+               return
+           }
+           let crossFade: CABasicAnimation = CABasicAnimation(keyPath: "contents")
+           crossFade.duration = 0.3
+            crossFade.fromValue = currentImage.cgImage
+            crossFade.toValue = newImage.cgImage
+            crossFade.isRemovedOnCompletion = false
+            crossFade.fillMode = CAMediaTimingFillMode.forwards
+            imageView.layer.add(crossFade, forKey: "animateContents")
+       }
+   }
+
 class RecordVideoViewController: UIViewController {
     
     var captureSession = AVCaptureSession()
@@ -150,9 +167,15 @@ class RecordVideoViewController: UIViewController {
     @objc func recordAction(){
         if movieOutput.isRecording {
             movieOutput.stopRecording()
-            self.recordButton.setImage(UIImage(named: "record_btn_on"), for: .normal)
+            //self.recordButton.setImage(UIImage(named: "record_btn_on"), for: .normal)
+            
+            self.recordButton.changeImageAnimated(image: UIImage(named: "record_btn_on"))
+            
         } else {
-            self.recordButton.setImage(UIImage(named: "record_btn_off"), for: .normal)
+            
+            self.recordButton.changeImageAnimated(image: UIImage(named: "record_btn_off"))
+            
+            //self.recordButton.setImage(UIImage(named: "record_btn_off"), for: .normal)
             let paths = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)
             let fileUrl = paths[0].appendingPathComponent("tmp_output.mov")
             try? FileManager.default.removeItem(at: fileUrl)
