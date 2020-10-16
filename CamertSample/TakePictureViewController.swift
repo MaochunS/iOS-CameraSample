@@ -99,21 +99,7 @@ class TakePictureViewController: UIViewController {
         return btn
     }()
     
-    lazy var camView: UIView = {
-        let theView = UIView()
-        theView.backgroundColor = .blue
-        theView.translatesAutoresizingMaskIntoConstraints = false
-        self.view.addSubview(theView)
-        
-        NSLayoutConstraint.activate([
-            theView.topAnchor.constraint(equalTo: self.view.topAnchor, constant: 80),
-            theView.bottomAnchor.constraint(equalTo: self.view.bottomAnchor, constant: -120),
-            theView.leftAnchor.constraint(equalTo: self.view.leftAnchor),
-            theView.rightAnchor.constraint(equalTo: self.view.rightAnchor)
-        ])
-        
-        return theView
-    }()
+   
     
     var camTorchOn = false
     
