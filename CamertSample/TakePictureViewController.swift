@@ -110,9 +110,13 @@ class TakePictureViewController: UIViewController {
         self.view.backgroundColor = .black
         
 
-        if !capturePicInit(){
-            let _ = self.closeButton
-        }
+        
+    }
+    
+    
+    
+    override func viewWillAppear(_ animated: Bool) {
+        checkCamera()
     }
     
     override func viewWillDisappear(_ animated: Bool) {
@@ -120,6 +124,57 @@ class TakePictureViewController: UIViewController {
         if self.captureSession.isRunning{
             self.captureSession.stopRunning()
         }
+    }
+    
+    
+    func checkCamera() {
+        
+        let authStatus = AVCaptureDevice.authorizationStatus(for: AVMediaType.video)
+        switch authStatus {
+        case .authorized:
+            if !capturePicInit(){
+                let _ = self.closeButton
+            }
+        case .denied: alertPromptToAllowCameraAccessViaSetting()
+        case .notDetermined: alertToEncourageCameraAccessInitially()
+        default: alertToEncourageCameraAccessInitially()
+        }
+    }
+
+    func jumpToSystemPrivacySetting() {
+        guard let appSetting = URL(string: UIApplication.openSettingsURLString) else {
+            return
+        }
+        if #available(iOS 10, *) {
+            UIApplication.shared.open(appSetting, options: [:], completionHandler: nil)
+        } else {
+            UIApplication.shared.openURL(appSetting)
+        }
+        self.dismiss(animated: true, completion: nil)
+    }
+    
+    func alertPromptToAllowCameraAccessViaSetting() {
+        let alert = UIAlertController(
+            title: "IMPORTANT",
+            message: "Camera access required for capturing photos!",
+            preferredStyle: UIAlertController.Style.alert
+        )
+        alert.addAction(UIAlertAction(title: "Cancel", style: .default, handler: nil))
+        alert.addAction(UIAlertAction(title: "Allow Camera", style: .cancel, handler: { (alert) -> Void in
+            self.jumpToSystemPrivacySetting()
+        }))
+        present(alert, animated: true, completion: nil)
+    }
+
+    func alertToEncourageCameraAccessInitially() {
+
+        AVCaptureDevice.requestAccess(for: AVMediaType.video) { granted in
+                DispatchQueue.main.async() {
+                    self.checkCamera()
+                    
+                }
+        }
+            
     }
     
     private func capturePicInit() -> Bool{
