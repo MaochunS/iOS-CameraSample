@@ -61,6 +61,7 @@ class PhotoPreviewViewController: UIViewController {
     lazy var picView : UIImageView = {
         let theView = UIImageView()
         theView.translatesAutoresizingMaskIntoConstraints = false
+        theView.contentMode = .scaleAspectFit;
         self.view.addSubview(theView)
         
         NSLayoutConstraint.activate([
